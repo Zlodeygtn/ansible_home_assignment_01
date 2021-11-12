@@ -5,22 +5,23 @@
     - vars/ports.yml
   tasks:
     - name: Installing {{package}} package
-      debug:
-        msg: Installing {{package}} package
       yum:
-        name: {{package}}
+        name: "{{package}}"
         state: present
     - name: Starting {{service}} service
-      debug:
-        msg: Starting {{service}} service
       service:
-        name: {{service}}
+        name: "{{service}}"
         state: started
     - name: Open {{ports}} for web-server access
       firewalld:
-        port: {{ports}}
+        port: "{{item}}/tcp"
         permanent: true
         state: enabled
+      loop: "{{ports}}"
+    - name: Copying index.html
+      copy:
+        content: "Welcome to my web server!"
+        dest: /var/www/html/index.html
   handlers:
     - name: Restart the firewalld service to load in the firewall changes
       service:
