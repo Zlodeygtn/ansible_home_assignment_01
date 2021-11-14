@@ -1,5 +1,6 @@
 ---
 - name: Config Grub
+  hosts: nodes
   tasks:
     - name: Ensure the Grub settings are exactly as needed
       lineinfile:
