@@ -9,12 +9,14 @@
         name: "{{package}}"
         autoremove: yes
         state: absent
+
     - name: Close {{ports}}
       firewalld:
         port: "{{item}}/tcp"
         permanent: true
         state: disabled
       loop: "{{ports}}"
+
     - name: Deleting index.html
       file:
         state: absent

@@ -14,6 +14,7 @@
       loop:
         - biosdevname
         - net.ifnames
+
     - name: Appending requiered options to grub
       lineinfile:
         path: "{{grub_path}}"
