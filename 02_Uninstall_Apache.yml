@@ -1,0 +1,27 @@
+---
+- name: Config Apache & Firewall
+  hosts: nodes
+  vars_files:
+    - vars/ports.yml
+  tasks:
+    - name: Uninstalling {{package}} package
+      yum:
+        name: "{{package}}"
+        autoremove: yes
+        state: absent
+    - name: Close {{ports}}
+      firewalld:
+        port: "{{item}}/tcp"
+        permanent: true
+        state: disabled
+      loop: "{{ports}}"
+    - name: Deleting index.html
+      file:
+        state: absent
+        path: /var/www/html/index.html
+  handlers:
+    - name: Restart the firewalld service to load in the firewall changes
+      service:
+        name: firewalld 
+        state: restarted
+...
