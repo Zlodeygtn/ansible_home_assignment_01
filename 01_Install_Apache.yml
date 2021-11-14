@@ -8,23 +8,36 @@
       yum:
         name: "{{package}}"
         state: present
+
     - name: Starting {{service}} service
       service:
         name: "{{service}}"
         state: started
+
     - name: Open {{ports}} for web-server access
       firewalld:
         port: "{{item}}/tcp"
         permanent: true
         state: enabled
       loop: "{{ports}}"
+      notify:
+        - Restart firewalld service
+
     - name: Copying index.html
       copy:
         content: "Welcome to my web server!"
         dest: /var/www/html/index.html
+      notify:
+       - Restart Apache
+
   handlers:
-    - name: Restart the firewalld service to load in the firewall changes
+    - name: Restart firewalld service
       service:
         name: firewalld 
+        state: restarted
+
+    - name: Restart Apache
+      service:
+        name: httpd
         state: restarted
 ...

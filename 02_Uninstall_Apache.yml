@@ -19,8 +19,11 @@
       file:
         state: absent
         path: /var/www/html/index.html
+      notify:
+        - Restart firewalld service
+
   handlers:
-    - name: Restart the firewalld service to load in the firewall changes
+    - name: Restart firewalld service
       service:
         name: firewalld 
         state: restarted

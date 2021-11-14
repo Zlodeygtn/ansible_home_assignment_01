@@ -1,11 +1,32 @@
 ---
-- name: Config Grub
+- name: Modify Grub
   hosts: nodes
+  vars:
+    grub_path: /etc/default/grub
   tasks:
-    - name: Ensure the Grub settings are exactly as needed
+    - name: Gathering biosdevname & net.ifnames from grub 
       lineinfile:
-        path: /etc/default/grub.test
-        regexp: 'net.ifnames=0'
-        line: 'net.ifnames=0'
+        path: "{{grub_path}}"
+        state: present
+        regexp: (GRUB_CMDLINE_LINUX=\".*?)(\s*{{ item }}=\d+)(.*\")$
+        line: '\g<1>\g<3>'
         backrefs: yes
+      loop:
+        - biosdevname
+        - net.ifnames
+    - name: Appending requiered options to grub
+      lineinfile:
+        path: "{{grub_path}}"
+        state: present
+        regexp: '^(GRUB_CMDLINE_LINUX=\".*)(\")$'
+        line: '\g<1> {{ item }}\g<2>'
+        backrefs: yes
+      loop:
+        - biosdevname=0
+        - net.ifnames=0
+      notify: Update grub file
+
+  handlers:
+    - name: Update grub file
+      shell: grub2-mkconfig
 ...
