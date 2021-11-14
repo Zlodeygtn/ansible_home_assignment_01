@@ -1,6 +1,10 @@
-- name: Ensure the Grub settings are exactly as needed
-  lineinfile:
-    path: /etc/default/grub.test
-    regexp: 'net.ifnames=0'
-    line: 'net.ifnames=0'
-    backrefs: yes
+---
+- name: Config Grub
+  tasks:
+    - name: Ensure the Grub settings are exactly as needed
+      lineinfile:
+        path: /etc/default/grub.test
+        regexp: 'net.ifnames=0'
+        line: 'net.ifnames=0'
+        backrefs: yes
+...
