@@ -4,28 +4,44 @@
   vars:
     grub_path: /etc/default/grub
   tasks:
-    - name: Gathering biosdevname & net.ifnames from grub 
-      lineinfile:
-        path: "{{grub_path}}"
-        state: present
-        regexp: (GRUB_CMDLINE_LINUX=\".*?)(\s*{{ item }}=\d+)(.*\")$
-        line: '\g<1>\g<3>'
-        backrefs: yes
-      loop:
-        - biosdevname
-        - net.ifnames
+    - name: Check if biosdevname=0
+      shell: grep -c "biosdevname=0" /etc/default/grub || true
+      register: biosdevname
 
-    - name: Appending requiered options to grub
-      lineinfile:
-        path: "{{grub_path}}"
-        state: present
-        regexp: '^(GRUB_CMDLINE_LINUX=\".*)(\")$'
-        line: '\g<1> {{ item }}\g<2>'
-        backrefs: yes
-      loop:
-        - biosdevname=0
-        - net.ifnames=0
-      notify: Update grub file
+    - name: Check if net.ifnames=0
+      shell: grep -c "net.ifnames=0" /etc/default/grub || true
+      register: netifnames
+      
+    - debug:
+        var: biosdevname.stdout
+    - debug:
+        var: netifnames.stdout
+
+    - name: Modify grub file
+      block:
+      - name: Gathering biosdevname & net.ifnames from grub 
+        lineinfile:
+          path: "{{grub_path}}"
+          state: present
+          regexp: (GRUB_CMDLINE_LINUX=\".*?)(\s*{{ item }}=\d+)(.*\")$
+          line: '\g<1>\g<3>'
+          backrefs: yes
+        loop:
+          - biosdevname
+          - net.ifnames
+
+      - name: Appending requiered options to grub
+        lineinfile:
+          path: "{{grub_path}}"
+          state: present
+          regexp: '^(GRUB_CMDLINE_LINUX=\".*)(\")$'
+          line: '\g<1> {{ item }}\g<2>'
+          backrefs: yes
+        loop:
+          - biosdevname=0
+          - net.ifnames=0
+        notify: Update grub file
+      when: (biosdevname.stdout == "0") or (netifnames.stdout == "0")
 
   handlers:
     - name: Update grub file
