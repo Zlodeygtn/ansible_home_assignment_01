@@ -1,6 +1,6 @@
 ---
 - name: Config Apache & Firewall
-  hosts: nodes
+  hosts: all
   vars_files:
     - vars/ports.yml
   tasks:
